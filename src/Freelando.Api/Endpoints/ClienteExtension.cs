@@ -17,9 +17,24 @@ public static class ClienteExtension
             return Results.Ok(await Task.FromResult(clientes));
         }).WithTags("Cliente").WithOpenApi();
 
-        app.MapGet("/clientes/identificador-nome", async ([FromServices] ClienteConverter converter, [FromServices] FreelandoContext contexto) =>
+        app.MapGet("/clientes/por-email", async ([FromServices] FreelandoContext contexto, string email) =>
+        {
+            var clientes = contexto.Clientes.Where(c => c.Email!.Equals(email)).ToList();
+
+            return Results.Ok(await Task.FromResult(clientes));
+        }).WithTags("Cliente").WithOpenApi();
+
+        app.MapGet("/clientes/identificador-nome", async ( [FromServices] FreelandoContext contexto) =>
         {
             var clientes = contexto.Clientes.Select(c => new { Identificador = c.Id, Nome = c.Nome });
+
+            return Results.Ok(await Task.FromResult(clientes));
+        }).WithTags("Cliente").WithOpenApi();
+
+        //Include: uma forma de usar SELECT com JOIN, se for relacionar mais de uma tabela acrescentar o ThenInclude
+        app.MapGet("/clientes/projeto-especialidade", async ( [FromServices] FreelandoContext contexto) =>
+        {
+            var clientes = contexto.Clientes.Include( p => p.Projetos ).ThenInclude( e => e.Especialidades ).AsSplitQuery().ToList(); //AsSplitQuery() quebra a consulta única complexa com diversos INNER JOINs e SELECTs em consultas separadas e menores, memlhorando significativamente a PERFORMANCE de execução.
 
             return Results.Ok(await Task.FromResult(clientes));
         }).WithTags("Cliente").WithOpenApi();
