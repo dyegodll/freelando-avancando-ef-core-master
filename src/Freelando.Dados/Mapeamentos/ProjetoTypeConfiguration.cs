@@ -1,12 +1,7 @@
 ﻿using Freelando.Modelo;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Freelando.Modelos;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Freelando.Dados.Mapeamentos;
 internal class ProjetoTypeConfiguration : IEntityTypeConfiguration<Projeto>
@@ -42,7 +37,14 @@ internal class ProjetoTypeConfiguration : IEntityTypeConfiguration<Projeto>
             r => r.HasOne<Projeto>(e => e.Projeto).WithMany(e => e.ProjetosEspecialidade).HasForeignKey(e => e.ProjetoId)
             );
 
-        
-        
+        var dateTimeToDateConverter = new DateTimeToDateConverter();
+
+        entity.OwnsOne(e => e.Vigencia, vigencia =>
+        {
+            vigencia.Property(v => v.DataInicio).HasColumnName("DataInicio").HasConversion(dateTimeToDateConverter);
+
+            vigencia.Property(v => v.DataEncerramento).HasColumnName("DataEncerramento").HasConversion(dateTimeToDateConverter);
+        });
+
     }
 }
