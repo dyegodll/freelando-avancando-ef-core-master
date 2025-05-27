@@ -3,7 +3,6 @@ using Freelando.Api.Requests;
 using Freelando.Dados;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Reflection.Metadata.Ecma335;
 
 namespace Freelando.Api.Endpoints;
 
@@ -25,22 +24,25 @@ public static class ContratoExtensions
             using var transaction = await contexto.Database.BeginTransactionAsync();
             try
             {
-                transaction.CreateSavepoint("Savepoint"); //permite manter a integridade do banco através do ROLLBACK caso dê problemas em algum ponto da transação
-                
+                transaction.CreateSavepoint("Savepoint");
                 var contrato = converter.RequestToEntity(contratoRequest);
                 await contexto.Contratos.AddAsync(contrato);
                 await contexto.SaveChangesAsync();
-
-                await transaction.CommitAsync(); //grava de fato as transações no banco
-
+                await transaction.CommitAsync();
                 return Results.Created($"/contrato/{contrato.Id}", contrato);
             }
-            catch (Exception e)
+            catch (DbUpdateConcurrencyException ex)
             {
-                transaction.RollbackToSavepoint("Savepoint"); //caso dê algum problema com a transação, volte o estado do banco para o SAVEPOINT
-                return Results.BadRequest(e.Message);
+                return Results.BadRequest($" Problemas de simultaneidade {ex.Message}");
             }
-            
+            catch (Exception ex)
+            {
+
+                transaction.RollbackToSavepoint("Savepoint");
+                return Results.BadRequest(ex.Message);           
+            }
+
+
         }).WithTags("Contrato").WithOpenApi();
 
         app.MapPut("/contrato/{id}", async ([FromServices] ContratoConverter converter, [FromServices] FreelandoContext contexto, Guid id, ContratoRequest contratoRequest) =>

@@ -23,4 +23,5 @@ public class Cliente
     public string? Telefone { get; set; }
     public ICollection<Projeto> Projetos { get; set; }
     public Endereco Endereco { get; set; }
+
 }

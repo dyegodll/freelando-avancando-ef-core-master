@@ -2,11 +2,17 @@
 using Freelando.Modelos;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Freelando.Dados;
 public class FreelandoContext: DbContext
 {
     private readonly IConfiguration _configuration;
+
     public FreelandoContext(DbContextOptions<FreelandoContext> options) : base(options)
     {
     }

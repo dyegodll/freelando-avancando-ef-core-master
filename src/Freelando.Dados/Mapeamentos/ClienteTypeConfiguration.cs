@@ -1,11 +1,6 @@
 ﻿using Freelando.Modelo;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Freelando.Dados.Mapeamentos;
 internal class ClienteTypeConfiguration : IEntityTypeConfiguration<Cliente>
@@ -27,6 +22,8 @@ internal class ClienteTypeConfiguration : IEntityTypeConfiguration<Cliente>
             endereco.Property(e => e.Numero).HasColumnName("Numero");
             endereco.Property(e => e.Complemento).HasColumnName("Complemento");
         });
+
+
 
     }
 }

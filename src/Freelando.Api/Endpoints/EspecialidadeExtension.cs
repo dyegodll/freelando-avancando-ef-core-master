@@ -2,6 +2,8 @@
 using Freelando.Api.Converters;
 using Freelando.Api.Requests;
 using Freelando.Dados;
+using Freelando.Dados.Repository;
+using Freelando.Dados.UnitOfWork;
 using Freelando.Modelo;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -13,9 +15,9 @@ public static class EspecialidadeExtensions
 {
     public static void AddEndPointEspecialidades(this WebApplication app)
     {
-        app.MapGet("/especialidades", async ([FromServices] EspecialidadeConverter converter, [FromServices] FreelandoContext contexto) =>
+        app.MapGet("/especialidades", async ([FromServices] EspecialidadeConverter converter, [FromServices] IEspecialidadeRepository repository) =>
         {
-            var especialidades = converter.EntityListToResponseList(contexto.Especialidades.ToList());
+            var especialidades = converter.EntityListToResponseList(await repository.BuscarTodos());
 
 
             return Results.Ok((especialidades));
@@ -39,7 +41,7 @@ public static class EspecialidadeExtensions
             return await especialidades.ToListAsync();
         }).WithTags("Especialidade").WithOpenApi();
 
-        app.MapPost("/especialidade", async ([FromServices] EspecialidadeConverter converter, [FromServices] FreelandoContext contexto, EspecialidadeRequest especialidadeRequest) =>
+        app.MapPost("/especialidade", async ([FromServices] EspecialidadeConverter converter, [FromServices] IUnitOfWork unitOfWork, EspecialidadeRequest especialidadeRequest) =>
         {
             var especialidade = converter.RequestToEntity(especialidadeRequest);
 
@@ -50,9 +52,9 @@ public static class EspecialidadeExtensions
                 return Results.BadRequest("A descrição não pode estar em branco e deve começar com letra maiúscula.");
             }
 
-            await contexto.Especialidades.AddAsync(especialidade);
-            await contexto.SaveChangesAsync();
-
+            await unitOfWork.EspecialidadeRepository.Adicionar(especialidade);
+            await unitOfWork.Commit();
+           
             return Results.Created($"/especialidade/{especialidade.Id}", especialidade);
         }).WithTags("Especialidade").WithOpenApi();
 
